@@ -42,14 +42,14 @@ jobs:
 
           # Deploy the app
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
-            cd $DEPLOY_DIR
+            cd /home/ubuntu/node-aws
             pwd  # Debug: Confirm directory
             ls -l  # Debug: List files
             sudo npm install -g pm2  # Install pm2 globally
             npm install  # Install app dependencies
             pm2 stop node-aws || true
             pm2 delete node-aws || true
-            pm2 start npm --name node-aws -- start --dir $DEPLOY_DIR  # Specify working directory
+            pm2 start npm --name node-aws -- start --dir /home/ubuntu/node-aws  # Specify working directory
             pm2 save
           EOF
 
