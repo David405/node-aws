@@ -5,8 +5,8 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 let users = [
-  { id: 1, name: 'Alice' },
-  { id: 2, name: 'Bob' },
+  { id: 1, name: 'Alice', desc: 'first' },
+  { id: 2, name: 'Bob', desc: 'second' },
 ];
 
 app.get('/health', (req, res) => {
@@ -18,7 +18,7 @@ app.get('/users', (req, res) => {
 });
 
 app.post('/users', (req, res) => {
-  const { name } = req.body;
+  const { name, desc } = req.body;
   if (!name) {
     return res.status(400).json({ error: 'Name is required' });
   }
