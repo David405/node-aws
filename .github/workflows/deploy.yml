@@ -26,30 +26,30 @@ jobs:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USER: ${{ secrets.EC2_USER }}
           EC2_KEY: ${{ secrets.EC2_SSH_KEY }}
-          DEPLOY_DIR: '/home/ubuntu/node-aws'  # Updated to match your directory
+          DEPLOY_DIR: '/home/ubuntu/node-aws'
         run: |
           echo "$EC2_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          # Ensure the directory exists and check it
+          # Ensure the directory exists
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "mkdir -p $DEPLOY_DIR && ls -ld $DEPLOY_DIR"
 
-          # Sync files to the correct directory
+          # Sync files
           rsync -avz --progress -e "ssh -i private_key.pem -o StrictHostKeyChecking=no" ./ $EC2_USER@$EC2_HOST:$DEPLOY_DIR
 
-          # Verify files are synced
+          # Verify sync
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "ls -l $DEPLOY_DIR"
 
-          # Deploy the app
+          # Deploy the app with sudo for pm2 installation
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             cd $DEPLOY_DIR
-            pwd  # Debug: Confirm directory
-            ls -l  # Debug: List files
-            npm install -g pm2  # Install pm2 globally
-            npm install  # Install app dependencies
-            pm2 stop node-aws || true  # Updated app name
-            pm2 delete node-aws || true  # Updated app name
-            pm2 start npm --name node-aws -- start  # Updated app name
+            pwd
+            ls -l
+            sudo npm install -g pm2  # Use sudo to install pm2 globally
+            npm install  # Install app dependencies (no sudo needed here)
+            pm2 stop node-aws || true
+            pm2 delete node-aws || true
+            pm2 start npm --name node-aws -- start
             pm2 save
           EOF
 
