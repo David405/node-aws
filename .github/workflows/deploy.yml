@@ -31,7 +31,7 @@ jobs:
           echo "$EC2_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          # Ensure the directory exists
+          # Ensure directory exists
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "mkdir -p $DEPLOY_DIR && ls -ld $DEPLOY_DIR"
 
           # Sync files
@@ -40,16 +40,16 @@ jobs:
           # Verify sync
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST "ls -l $DEPLOY_DIR"
 
-          # Deploy the app with sudo for pm2 installation
+          # Deploy the app
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST << 'EOF'
             cd $DEPLOY_DIR
-            pwd
-            ls -l
-            sudo npm install -g pm2  # Use sudo to install pm2 globally
-            npm install  # Install app dependencies (no sudo needed here)
+            pwd  # Debug: Confirm directory
+            ls -l  # Debug: List files
+            sudo npm install -g pm2  # Install pm2 globally
+            npm install  # Install app dependencies
             pm2 stop node-aws || true
             pm2 delete node-aws || true
-            pm2 start npm --name node-aws -- start
+            pm2 start npm --name node-aws -- start --dir $DEPLOY_DIR  # Specify working directory
             pm2 save
           EOF
 
